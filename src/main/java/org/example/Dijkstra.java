@@ -2,21 +2,37 @@ package org.example;
 
 import java.util.*;
 
+/**
+ * dijkstra's algorithm implementation for finding the shortest weighted route
+ * between two rooms in the national gallery graph.
+ * also provides a most interesting route variant that greedily visits all rooms
+ * containing preferred artists along the way.
+ */
 public class Dijkstra {
 
-    // -----------------------
-    // STANDARD SHORTEST PATH
-    // -----------------------
+    /**
+     * finds the shortest weighted path from start to end using dijkstra's algorithm.
+     * uses a priority queue with lazy deletion to handle updated distances efficiently.
+     * avoids any rooms in the avoid set.
+     *
+     * @param graph the graph to search
+     * @param start the starting room
+     * @param end the destination room
+     * @param avoid set of rooms to exclude from the route
+     * @return list of rooms representing the shortest path, or empty list if no path found
+     */
     public static List<Room> findPath(Graph graph, Room start, Room end,
                                       Set<Room> avoid) {
 
         Map<Room, Double> dist = new HashMap<>();
         Map<Room, Room> prev = new HashMap<>();
 
+        // priority queue ordered by current best known distance
         PriorityQueue<Room> pq = new PriorityQueue<>(
                 Comparator.comparingDouble(r -> dist.getOrDefault(r, Double.POSITIVE_INFINITY))
         );
 
+        // initialise all distances to infinity
         for (Room r : graph.getNodes()) {
             dist.put(r, Double.POSITIVE_INFINITY);
         }
@@ -35,6 +51,7 @@ public class Dijkstra {
 
                 double newDist = dist.get(current) + e.weight;
 
+                // only update if a shorter path to this neighbour has been found
                 if (newDist < dist.getOrDefault(e.target, Double.POSITIVE_INFINITY)) {
                     dist.put(e.target, newDist);
                     prev.put(e.target, current);
@@ -46,17 +63,24 @@ public class Dijkstra {
         return reconstruct(prev, start, end);
     }
 
-    // -----------------------
-    // MOST INTERESTING PATH
-    // -----------------------
-    public static List<Room> findInterestingPath(Graph graph,
-                                                 Room start,
-                                                 Room end,
-                                                 Set<Room> avoid,
-                                                 Map<String, List<Exhibit>> exhibitsByRoom,
-                                                 Set<String> preferredArtists) {
+    /**
+     * finds the most interesting path from start to end by visiting all rooms
+     * that contain exhibits by the preferred artists.
+     * uses a greedy nearest-neighbour approach to order the interesting rooms,
+     * then chains dijkstra calls between each stop.
+     * falls back to the standard shortest path if no interesting rooms are found.
+     *
+     * @param graph the graph to search
+     * @param start the starting room
+     * @param end the destination room
+     * @param avoid set of rooms to exclude from the route
+     * @param exhibitsByRoom map of room ids to their list of exhibits
+     * @param preferredArtists set of lowercase artist names the visitor is interested in
+     * @return list of rooms representing the most interesting path
+     */
+    public static List<Room> findInterestingPath(Graph graph, Room start, Room end, Set<Room> avoid, Map<String, List<Exhibit>> exhibitsByRoom, Set<String> preferredArtists) {
 
-        // find all rooms containing a preferred artist
+        // collect all rooms that contain at least one preferred artist
         List<Room> interestingRooms = new ArrayList<>();
         for (Room r : graph.getNodes()) {
             if (avoid.contains(r) || r.equals(start) || r.equals(end)) continue;
@@ -70,12 +94,12 @@ public class Dijkstra {
             }
         }
 
+        // if no interesting rooms found, fall back to standard shortest path
         if (interestingRooms.isEmpty()) {
             return findPath(graph, start, end, avoid);
         }
 
-        // greedily order interesting rooms by proximity from current position
-        // start -> nearest interesting room -> next nearest -> ... -> end
+        // greedily order interesting rooms by proximity — always visit the nearest next
         List<Room> orderedWaypoints = new ArrayList<>();
         List<Room> remaining = new ArrayList<>(interestingRooms);
         Room current = start;
@@ -99,7 +123,7 @@ public class Dijkstra {
             current = nearest;
         }
 
-        // build full path: start -> wp1 -> wp2 -> ... -> end
+        // build full path by chaining dijkstra between each ordered stop
         List<Room> fullPath = new ArrayList<>();
         List<Room> stops = new ArrayList<>();
         stops.add(start);
@@ -109,6 +133,7 @@ public class Dijkstra {
         for (int i = 0; i < stops.size() - 1; i++) {
             List<Room> segment = findPath(graph, stops.get(i), stops.get(i + 1), avoid);
             if (segment.isEmpty()) continue;
+            // remove the first room of each segment to avoid duplicating join nodes
             if (!fullPath.isEmpty()) segment.remove(0);
             fullPath.addAll(segment);
         }
@@ -116,18 +141,32 @@ public class Dijkstra {
         return fullPath;
     }
 
-    // -----------------------
-    // HELPERS
-    // -----------------------
+    /**
+     * returns the cost of a path as the number of edges traversed.
+     * returns max value if the path is empty to indicate no path was found.
+     *
+     * @param path the path to calculate the cost of
+     * @return the number of steps in the path, or double max value if empty
+     */
     private static double pathCost(List<Room> path) {
         return path.isEmpty() ? Double.MAX_VALUE : path.size() - 1;
     }
 
+    /**
+     * reconstructs the path from start to end by walking back through the prev map.
+     * returns an empty list if no path was found.
+     *
+     * @param prev map of each room to the room it was reached from
+     * @param start the starting room
+     * @param end the destination room
+     * @return list of rooms from start to end, or empty list if no path found
+     */
     private static List<Room> reconstruct(Map<Room, Room> prev, Room start, Room end) {
 
         List<Room> path = new ArrayList<>();
         Room current = end;
 
+        // walk back from end to start using the prev map
         while (current != null) {
             path.add(current);
             current = prev.get(current);
@@ -135,6 +174,7 @@ public class Dijkstra {
 
         Collections.reverse(path);
 
+        // verify the path actually starts at the start room
         if (!path.isEmpty() && path.get(0).equals(start)) {
             return path;
         }

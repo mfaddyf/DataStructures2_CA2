@@ -21,3 +21,31 @@ public class App extends Application {
         launch();
     }
 }
+
+// ---
+// references
+/*
+graph data str
+https://www.geeksforgeeks.org/graph-data-structure-and-algorithms/
+https://www.geeksforgeeks.org/adjacency-list-meaning-definition-in-dsa/
+bfs
+https://www.geeksforgeeks.org/breadth-first-search-or-bfs-for-a-graph/
+https://www.w3schools.com/dsa/dsa_algo_graphs_bfs.php
+dfs
+https://www.geeksforgeeks.org/depth-first-search-or-dfs-for-a-graph/
+https://www.w3schools.com/dsa/dsa_algo_graphs_dfs.php
+dijkstras shortest
+https://www.geeksforgeeks.org/dijkstras-shortest-path-algorithm-greedy-algo-7/
+https://www.w3schools.com/dsa/dsa_algo_graphs_dijkstra.php
+priority queue
+https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html
+hashmap
+https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashMap.html
+https://www.w3schools.com/java/java_hashmap.asp
+arraylists
+https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html
+https://www.w3schools.com/java/java_arraylist.asp
+hashsets
+https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/HashSet.html
+https://www.w3schools.com/java/java_hashset.asp
+ */
