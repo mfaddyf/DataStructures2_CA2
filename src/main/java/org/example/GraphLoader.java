@@ -119,11 +119,12 @@ public class GraphLoader {
 
             // limit 4 — title and artist name may contain commas
             String[] parts = line.split(",", 4);
-            String title  = parts[0].trim();
-            String artist = parts[1].trim();
-            String roomId = parts[2].trim();
+            String id     = parts[0].trim();
+            String title  = parts[1].trim();
+            String artist = parts[2].trim();
+            String roomId = parts[3].trim();
 
-            Exhibit exhibit = new Exhibit(title, artist);
+            Exhibit exhibit = new Exhibit(id, title, artist, roomId);
             byRoom.computeIfAbsent(roomId, k -> new ArrayList<>()).add(exhibit);
         }
         br.close();

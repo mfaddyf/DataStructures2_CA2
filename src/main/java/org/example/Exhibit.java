@@ -3,23 +3,28 @@ package org.example;
 /**
  * represents an art exhibit displayed in a room of the national gallery.
  * each exhibit has a title and artist name used for route interest scoring.
+ * the id and room id are stored for csv compatibility and future use.
  */
 public class Exhibit {
 
+    private String id;
     private String title;
     private String artist;
+    private String roomId;
 
     /**
      * constructs an exhibit with the given details.
-     * the id and roomId parameters are accepted for csv compatibility
-     * but are not stored in this class.
      *
+     * @param id the unique identifier for this exhibit
      * @param title the title of the artwork
      * @param artist the name of the artist
+     * @param roomId the id of the room containing this exhibit
      */
-    public Exhibit(String title, String artist) {
+    public Exhibit(String id, String title, String artist, String roomId) {
+        this.id = id;
         this.title = title;
         this.artist = artist;
+        this.roomId = roomId;
     }
 
     /**
